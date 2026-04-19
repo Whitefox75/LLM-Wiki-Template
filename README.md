@@ -1,6 +1,6 @@
 # LLM Wiki Workspace
 
-Ein **Karpathy-Style LLM Wiki** — ein persistentes, compoundierendes Wissens-Artefakt,
+Ein **Karpathy -Style LLM Wiki** — ein persistentes, compoundierendes Wissens-Artefakt,
 das ein LLM-Agent inkrementell aus unveränderlichen Rohquellen aufbaut und pflegt.
 
 ## Konzept
