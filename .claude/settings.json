@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Write(wiki/**)",
+      "Write(raw/articles/**)",
+      "Write(wiki/lint-reports/**)",
+      "Write(wiki/log.md)",
+      "Write(wiki/index.md)",
+      "Write(wiki/index.md.bak)",
+      "Glob(**)",
+      "Grep(**)",
+      "Bash(find:grep:wc:cp:mkdir:which)",
+      "WebFetch(**)"
+    ],
+    "deny": [
+      "Write(raw/papers/**)",
+      "Write(raw/transcripts/**)",
+      "Write(raw/docs/**)",
+      "Write(raw/assets/**)",
+      "Write(_page-templates/**)",
+      "Write(CLAUDE.md)",
+      "Write(SETUP.md)",
+      "Write(WORKFLOW.md)",
+      "Write(TRADE-OFFS.md)"
+    ]
+  },
+  "hooks": {
+    "post_write_wiki": "Ensure log entry appended to wiki/log.md"
+  }
+}
