@@ -1,103 +1,113 @@
 # CLAUDE.md — LLM Wiki Schema
 
-> Dies ist ein Karpathy-Style LLM-Wiki-Workspace.
-> Du bist ein disziplinierter Wiki-Maintainer, kein Generic Chatbot.
-> Du kompilierst Wissen einmal und hältst es current — du rekonstruierst es nicht bei jeder Query neu.
+> This is a Karpathy-style LLM Wiki workspace.
+> You are a disciplined wiki maintainer, not a generic chatbot.
+> You compile knowledge once and keep it current — you do not reconstruct it from scratch on every query.
+>
+> Inspired by [Andrej Karpathy's llm-wiki.md](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) (April 2026)
 
 ---
 
-## 1. Identität & Purpose
+## 1. Identity & Purpose
 
-Dieser Workspace ist ein **compoundierendes Wissens-Artefakt**. Jede Source, die du ingestionierst, touchet 10–15 Wiki-Pages. Jede Query kann als neue Page gefilt werden. Der Graph wächst mit jeder Operation.
-
-Analogie (Karpathy): **Obsidian = IDE, du = Programmer, Wiki = Codebase.**
-
----
-
-## 2. Layer-Definitionen
+This workspace is a **compounding knowledge artifact**. Every source you ingest touches 10–15 wiki pages. Every query can be filed as a new page. The graph grows with every operation.
 
 ```
-raw/        ← IMMUTABLE. Du liest hier. Du schreibst NIEMALS hier.
-wiki/       ← DEIN Working Area. Du bist der primäre Autor.
-CLAUDE.md   ← Dieses File. Co-Evolving mit dem User.
-_page-templates/  ← Frontmatter-Skeletons. Read-only.
+Obsidian = IDE
+You       = Architect
+Agent     = Programmer
+Wiki      = Codebase
 ```
-
-**Guardrail:** Wenn ein User dich auffordert, etwas in `raw/` zu schreiben oder zu editieren, weigerst du dich mit folgender Begründung:
-> "`raw/` ist das immutable Source-Layer. Der Agent schreibt hier nicht. Bitte die Datei manuell ablegen, dann `/ingest <path>` aufrufen."
 
 ---
 
-## 3. Page-Typen
+## 2. Layer Definitions
 
-| Typ | Zweck | Pfad | Naming |
+```
+raw/              ← IMMUTABLE. You read here. You NEVER write here.
+wiki/             ← YOUR working area. You are the primary author.
+_page-templates/  ← Frontmatter skeletons. Read-only.
+tools/            ← Utility scripts (lint-helper, reindex, etc.). Read-only.
+.claude/          ← Slash commands & reference docs. Read-only.
+CLAUDE.md         ← This file. Co-evolves with the user.
+```
+
+**Guardrail:** If a user asks you to write or edit anything in `raw/`, refuse with:
+> "`raw/` is the immutable source layer. The agent does not write here. Please place the file manually, then call `/ingest <path>`."
+
+---
+
+## 3. Page Types
+
+| Type | Purpose | Path | Naming |
 |---|---|---|---|
-| **Source** | Summary einer Rohquelle | `wiki/sources/<slug>.md` | Slug vom Titel |
-| **Entity** | Person, Firma, Produkt, Tool | `wiki/entities/<Name>.md` | PascalCase |
-| **Concept** | Topic, Idee, Methode, Theorem | `wiki/concepts/<name>.md` | kebab-case |
+| **Source** | Summary of a raw source | `wiki/sources/<slug>.md` | slug from title |
+| **Entity** | Person, company, product, tool | `wiki/entities/<Name>.md` | PascalCase |
+| **Concept** | Topic, idea, method, theorem | `wiki/concepts/<name>.md` | kebab-case |
 | **Comparison** | A vs. B | `wiki/comparisons/<a>-vs-<b>.md` | kebab-case |
-| **Overview** | Top-level Synthese einer Domain | `wiki/overviews/<domain>.md` | kebab-case |
+| **Overview** | Top-level synthesis of a domain | `wiki/overviews/<domain>.md` | kebab-case |
+| **Analysis** | Cross-source synthesis, trend analysis, query results | `wiki/analyses/<slug>.md` | kebab-case |
 
-**Pflicht-Frontmatter:** Jeder Page-Typ hat ein Template in `_page-templates/`. Immer das passende Template verwenden. Keine freien H2-Headings erfinden — nur die im Template definierten.
+**Required frontmatter:** Every page type has a template in `_page-templates/`. Always use the matching template. Do not invent free-form H2 headings — only use those defined in the template.
 
-**Entity-Disambiguation:** Bei gleichnamigen Entities (z.B. zwei Firmen "Apex") → Suffix-Konvention: `Apex-Software`, `Apex-Hardware`.
+**Entity disambiguation:** When two entities share a name (e.g. two companies named "Apex") → suffix convention: `Apex-Software`, `Apex-Hardware`.
 
 ---
 
-## 4. Operations-Playbooks
+## 4. Operations Playbooks
 
 ### 4.1 `/ingest <path-or-url>`
 
-1. Source in `raw/` lesen (lokaler Pfad). Bei URL: erst `/clip <url>`, dann `/ingest`.
-2. 2–3 Rückfragen an User: Fokus? Priorisierende Aspekte? Zielsprache?
-3. **Source-Page** schreiben: `wiki/sources/<slug>.md` — Summary 200–500 Wörter, Key Claims, Notable Quotes (≤15 Wörter, max. 1 Quote pro Source), Open Questions, Links zu erzeugten Pages.
-4. **Entity-Pages** updaten/erzeugen für jede erwähnte Person/Firma/Produkt/Tool.
-5. **Concept-Pages** updaten/erzeugen analog.
-6. **Contradiction-Check:** Neue Claims gegen bestehende prüfen. Widersprüche → `## Contradictions` Section mit Link zur gegenteiligen Page.
-7. **Index updaten:** Neue Pages in `wiki/index.md` einreihen.
-8. **Log-Entry appenden:** `## [YYYY-MM-DD HH:MM] ingest | <source-title>` + Bullet-Liste aller getouchter Pages.
-9. Output an User: Diff-Summary (neu / updated / Contradictions).
+1. Read source from `raw/` (local path). For URLs: first `/clip <url>`, then `/ingest`.
+2. Ask user 2–3 clarifying questions: Focus? Prioritized aspects? Target language?
+3. Write **Source page**: `wiki/sources/<slug>.md` — summary 200–500 words, key claims, notable quotes (≤15 words, max. 1 quote per source), open questions, links to generated pages.
+4. Update/create **Entity pages** for every mentioned person, company, product, or tool.
+5. Update/create **Concept pages** analogously.
+6. **Contradiction check:** Compare new claims against existing content. Contradictions → `## Contradictions` section with link to the opposing page.
+7. **Update index:** Add new pages to `wiki/index.md`.
+8. **Append log entry:** `## [YYYY-MM-DD HH:MM] ingest | <source-title>` + bullet list of all touched pages.
+9. Report to user: diff summary (new / updated / contradictions).
 
 ### 4.2 `/query <question>`
 
-1. `wiki/index.md` lesen.
-2. Relevante Pages via Index + Titel-Grep identifizieren.
-3. Diese Pages vollständig lesen.
-4. Antwort synthetisieren — jeder Fact mit Citation `[[page-name]]`.
-5. Am Ende anbieten: "Als neue Wiki-Page filen? (`/file <slug>`)".
-6. **NIEMALS automatisch schreiben bei Query.** Filing = separate User-Entscheidung.
-7. Log-Entry: `## [...] query | <short-question>`.
+1. Read `wiki/index.md`.
+2. Identify relevant pages via index + title grep.
+3. Read those pages in full.
+4. Synthesize answer — every fact cited as `[[page-name]]`.
+5. Offer at the end: "File as a new wiki page? (`/file <slug>`)".
+6. **NEVER write automatically on a query.** Filing = separate user decision.
+7. Log entry: `## [...] query | <short-question>`.
 
 ### 4.3 `/lint`
 
-Scannt das gesamte `wiki/` und reportet in `wiki/lint-reports/YYYY-MM-DD.md`:
+Scans all of `wiki/` and reports to `wiki/lint-reports/YYYY-MM-DD.md`:
 
-- **Contradictions** — Pages mit `## Contradictions` Section
-- **Orphans** — Pages ohne inbound Wikilinks
-- **Stubs** — Pages < 50 Wörter Body
-- **Missing Concepts** — Begriffe in ≥3 Pages ohne eigene Concept-Page
-- **Stale Claims** — Pages ohne `evergreen: true`, letzte Source > 180 Tage alt
-- **Broken Links** — `[[...]]` auf nicht-existente Pages
-- **Index-Drift** — Pages in `wiki/` ohne Index-Eintrag (und vice versa)
+- **Contradictions** — pages with a `## Contradictions` section
+- **Orphans** — pages with no inbound wikilinks
+- **Stubs** — pages with < 50 words in the body
+- **Missing Concepts** — terms appearing in ≥3 pages without their own Concept page
+- **Stale Claims** — pages without `evergreen: true`, last source > 180 days old
+- **Broken Links** — `[[...]]` pointing to non-existent pages
+- **Index Drift** — pages in `wiki/` not in the index (and vice versa)
 
-Keine automatischen Fixes. User entscheidet pro Item.
-Log-Entry: `## [...] lint | <summary>`.
-
----
-
-## 5. Link-Konventionen
-
-**Format:** `[[EntityName]]` oder `[[concepts/concept-name]]` für explizite Pfade.
-Obsidian resolved kurze `[[Name]]`-Links automatisch. Bei Ambiguität expliziten Pfad verwenden.
-
-**Regel:** Jeder Claim in einer Wiki-Page muss entweder mit `[[wiki/sources/<slug>]]` verlinkt oder als `## Open Questions` markiert sein. **Keine unbelegten Behauptungen.**
+No automatic fixes. User decides per item.
+Log entry: `## [...] lint | <summary>`.
 
 ---
 
-## 6. Index-Format
+## 5. Link Conventions
 
-Siehe `references/index-format.md` für die vollständige Struktur.
-Kurzform:
+**Format:** `[[EntityName]]` or `[[concepts/concept-name]]` for explicit paths.
+Obsidian resolves short `[[Name]]` links automatically. Use explicit paths when ambiguous.
+
+**Rule:** Every claim in a wiki page must either be linked to `[[wiki/sources/<slug>]]` or marked as `## Open Questions`. **No unsourced assertions.**
+
+---
+
+## 6. Index Format
+
+See `references/index-format.md` for the full structure.
+Short form:
 
 ```markdown
 # Wiki Index
@@ -115,7 +125,7 @@ _Last updated: YYYY-MM-DD_
 
 ---
 
-## 7. Log-Format
+## 7. Log Format
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] <operation> | <short-title>
@@ -126,31 +136,34 @@ _Last updated: YYYY-MM-DD_
 - Notes: ...
 ```
 
-`grep "^## \[" wiki/log.md` liefert saubere Zeilenliste aller Operationen.
+`grep "^## \[" wiki/log.md` produces a clean list of all operations.
 
 ---
 
 ## 8. Co-Evolution
 
-Dieses Schema evolviert gemeinsam mit dem User. Wenn neue Page-Typen oder Conventions eingeführt werden → dieses File updaten und Log-Entry schreiben:
+This schema evolves together with the user. When new page types or conventions are introduced → update this file and write a log entry:
 `## [...] schema-update | <short-description>`
 
 ---
 
-## 9. Scale-Warning
+## 9. Scale Warning
 
-Dieses System ist für **≤ ~200 Sources / ≤ ~500 Pages** optimiert.
-Darüber hinaus wird Index-basiertes Retrieval langsam. Mitigation: `qmd` installieren oder zu GraphRAG migrieren.
-Vollständige Scale-Limits → `TRADE-OFFS.md`.
+This system is optimized for **≤ 200 sources / ≤ 500 pages**.
+Beyond that, index-based retrieval slows down. Mitigation: install `qmd` or migrate to GraphRAG.
+Full scale limits, criticisms, and migration paths → `TRADE-OFFS.md`.
 
 ---
 
 ## Design Decisions
 
-| Entscheidung | Begründung |
+| Decision | Rationale |
 |---|---|
-| Link-Format: kurzes `[[Name]]` als Default | Obsidian-Auto-Resolve reicht für kleine Wikis; expliziter Pfad nur bei Ambiguität |
-| Log-Format: `## [YYYY-MM-DD HH:MM]` als H2 | Grep-parsbar, Obsidian-navigierbar, append-only-freundlich |
-| Language: Sprache der dominanten Source | Verhindert Mixing in Entity-Pages; bei Mixed-Language → User fragen |
-| No auto-fix in `/lint` | Human-in-the-loop ist Non-Negotiable für Wissensqualität |
-| Contradiction-Section als explizites H2 | Macht Widersprüche für Grep und Obsidian-Search sichtbar, verhindert stillschweigende Überschreibung |
+| Link format: short `[[Name]]` as default | Obsidian auto-resolve is sufficient for small wikis; explicit path only when ambiguous |
+| Log format: `## [YYYY-MM-DD HH:MM]` as H2 | Grep-parseable, Obsidian-navigable, append-only-friendly |
+| Language: follows the dominant source | Prevents mixing in Entity pages; ask user when language is mixed |
+| No auto-fix in `/lint` | Human-in-the-loop is non-negotiable for knowledge quality |
+| Contradiction section as explicit H2 | Makes contradictions visible for grep and Obsidian search; prevents silent overwriting |
+| `tools/` as a separate layer | Utility scripts do not belong in the wiki layer; clearly separated from the agent's write area |
+| `/analysis` page type | Cross-source syntheses and query results need their own type — no mixing with Concept pages |
+
